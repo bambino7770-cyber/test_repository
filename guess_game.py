@@ -10,6 +10,7 @@ DIFFICULTIES = {
     "3": ("ハード", 1, 500),
 }
 SCORES_PATH = Path(__file__).resolve().parent / "high_scores.json"
+HINT_THRESHOLDS = (5, 20)
 
 
 def judge(guess: int, answer: int) -> str:
@@ -18,6 +19,15 @@ def judge(guess: int, answer: int) -> str:
     if guess > answer:
         return "high"
     return "correct"
+
+
+def hint(guess: int, answer: int) -> str:
+    distance = abs(guess - answer)
+    if distance <= HINT_THRESHOLDS[0]:
+        return "あと少し！"
+    if distance <= HINT_THRESHOLDS[1]:
+        return "近づいています。"
+    return "まだ遠いです。"
 
 
 def read_difficulty() -> tuple[str, int, int] | None:
@@ -104,8 +114,10 @@ def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = No
         result = judge(guess, answer)
         if result == "low":
             print("もっと大きい数字です。")
+            print(hint(guess, answer))
         elif result == "high":
             print("もっと小さい数字です。")
+            print(hint(guess, answer))
         else:
             print(f"正解です！ {attempts}回で当てました。")
             scores = load_scores()
