@@ -1,12 +1,15 @@
 """数字を当てる数当てゲーム。難易度に応じて範囲が変わる。"""
 
+import json
 import random
+from pathlib import Path
 
 DIFFICULTIES = {
     "1": ("イージー", 1, 50),
     "2": ("ノーマル", 1, 100),
     "3": ("ハード", 1, 500),
 }
+SCORES_PATH = Path(__file__).resolve().parent / "high_scores.json"
 
 
 def judge(guess: int, answer: int) -> str:
@@ -48,6 +51,39 @@ def read_guess(lower: int, upper: int) -> int | None:
         return guess
 
 
+def load_scores() -> dict[str, int]:
+    try:
+        with SCORES_PATH.open(encoding="utf-8") as scores_file:
+            scores = json.load(scores_file)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(scores, dict):
+        return {}
+    return {
+        name: score
+        for name, score in scores.items()
+        if isinstance(name, str) and isinstance(score, int) and not isinstance(score, bool)
+    }
+
+
+def save_scores(scores: dict[str, int]) -> None:
+    with SCORES_PATH.open("w", encoding="utf-8") as scores_file:
+        json.dump(scores, scores_file, ensure_ascii=False, indent=2)
+        scores_file.write("\n")
+
+
+def update_best(
+    scores: dict[str, int], difficulty_name: str, attempts: int
+) -> tuple[dict[str, int], bool]:
+    updated_scores = scores.copy()
+    is_new_record = (
+        difficulty_name not in updated_scores or attempts < updated_scores[difficulty_name]
+    )
+    if is_new_record:
+        updated_scores[difficulty_name] = attempts
+    return updated_scores, is_new_record
+
+
 def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = None) -> None:
     if difficulty is None:
         difficulty = read_difficulty()
@@ -72,6 +108,13 @@ def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = No
             print("もっと小さい数字です。")
         else:
             print(f"正解です！ {attempts}回で当てました。")
+            scores = load_scores()
+            scores, is_new_record = update_best(scores, name, attempts)
+            save_scores(scores)
+            print(f"今回のスコア: {attempts}回")
+            print(f"歴代ベストスコア: {scores[name]}回")
+            if is_new_record:
+                print("新記録です！")
             return
 
 
