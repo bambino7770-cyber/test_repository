@@ -65,9 +65,13 @@ def load_scores() -> dict[str, int]:
     try:
         with SCORES_PATH.open(encoding="utf-8") as scores_file:
             scores = json.load(scores_file)
-    except (OSError, json.JSONDecodeError):
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError) as error:
+        print(f"警告: スコアを読み込めませんでした（{error}）。空の記録として続行します。")
         return {}
     if not isinstance(scores, dict):
+        print("警告: スコアの形式が不正です。空の記録として続行します。")
         return {}
     return {
         name: score
@@ -76,10 +80,15 @@ def load_scores() -> dict[str, int]:
     }
 
 
-def save_scores(scores: dict[str, int]) -> None:
-    with SCORES_PATH.open("w", encoding="utf-8") as scores_file:
-        json.dump(scores, scores_file, ensure_ascii=False, indent=2)
-        scores_file.write("\n")
+def save_scores(scores: dict[str, int]) -> bool:
+    try:
+        with SCORES_PATH.open("w", encoding="utf-8") as scores_file:
+            json.dump(scores, scores_file, ensure_ascii=False, indent=2)
+            scores_file.write("\n")
+    except (OSError, TypeError, ValueError) as error:
+        print(f"警告: スコアを保存できませんでした（{error}）。記録なしで続行します。")
+        return False
+    return True
 
 
 def update_best(
