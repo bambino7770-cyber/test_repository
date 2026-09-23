@@ -114,12 +114,12 @@ def show_rankings(scores: dict[str, int]) -> None:
         print(f"  {rank}位: {name} {attempts}回")
 
 
-def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = None) -> None:
+def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = None) -> bool:
     if difficulty is None:
         difficulty = read_difficulty()
         if difficulty is None:
             print("\n終了します。")
-            return
+            return False
     name, lower, upper = difficulty
     if answer is None:
         answer = random.randint(lower, upper)
@@ -129,7 +129,7 @@ def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = No
         guess = read_guess(lower, upper)
         if guess is None:
             print("\n終了します。")
-            return
+            return False
         attempts += 1
         result = judge(guess, answer)
         if result == "low":
@@ -149,8 +149,31 @@ def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = No
                 print("新記録です！")
             if saved:
                 show_rankings(scores)
+            return True
+
+
+def read_replay() -> bool:
+    while True:
+        try:
+            choice = input("もう一度プレイしますか？ (y/n): ").strip().lower()
+        except EOFError:
+            print()
+            return False
+        if choice in ("y", "yes"):
+            return True
+        if choice in ("n", "no"):
+            return False
+        print("y または n を入力してください。")
+
+
+def main() -> None:
+    while True:
+        if not play():
+            return
+        if not read_replay():
+            print("終了します。")
             return
 
 
 if __name__ == "__main__":
-    play()
+    main()
