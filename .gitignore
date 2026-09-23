@@ -1,2 +1,3 @@
-high_scores.json
 __pycache__/
+*.pyc
+scores.json
