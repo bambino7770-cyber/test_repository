@@ -103,6 +103,17 @@ def update_best(
     return updated_scores, is_new_record
 
 
+def show_rankings(scores: dict[str, int]) -> None:
+    if not scores:
+        print("まだ記録がありません。")
+        return
+    print("== 歴代ベストスコア ==")
+    for rank, (name, attempts) in enumerate(
+        sorted(scores.items(), key=lambda item: item[1]), start=1
+    ):
+        print(f"  {rank}位: {name} {attempts}回")
+
+
 def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = None) -> None:
     if difficulty is None:
         difficulty = read_difficulty()
@@ -136,6 +147,7 @@ def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = No
             print(f"歴代ベストスコア: {scores[name]}回")
             if is_new_record:
                 print("新記録です！")
+            show_rankings(scores)
             return
 
 
