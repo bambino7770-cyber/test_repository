@@ -15,4 +15,3 @@ jobs:
           python-version: "3.12"
       - run: pip install pytest
       - run: python -m pytest test_guess_game.py -v
-      - run: sleep 120
