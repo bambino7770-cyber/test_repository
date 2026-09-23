@@ -142,12 +142,13 @@ def play(answer: int | None = None, difficulty: tuple[str, int, int] | None = No
             print(f"正解です！ {attempts}回で当てました。")
             scores = load_scores()
             scores, is_new_record = update_best(scores, name, attempts)
-            save_scores(scores)
+            saved = save_scores(scores)
             print(f"今回のスコア: {attempts}回")
             print(f"歴代ベストスコア: {scores[name]}回")
             if is_new_record:
                 print("新記録です！")
-            show_rankings(scores)
+            if saved:
+                show_rankings(scores)
             return
 
 
